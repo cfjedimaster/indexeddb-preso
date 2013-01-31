@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Note Database</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/bootstrap/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/bootstrap/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/bootstrap/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/bootstrap/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/bootstrap/ico/apple-touch-icon-57-precomposed.png">
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script>
+var db;
+
+function dtFormat(input) {
+    if(!input) return "";
+    var res = (input.getMonth()+1) + "/" + input.getDate() + "/" + input.getFullYear() + " ";
+    var hour = input.getHours()+1;
+    var ampm = "AM";
+    if(hour > 12){
+        hour-=12;
+        ampm = "PM";
+    }
+    var minute = input.getMinutes()+1;
+    if(minute < 10) minute = "0" + minute;
+    res += hour + ":" + minute + " " + ampm;
+    return res;
+}
+
+$(document).ready(function() {
+
+	var openRequest = indexedDB.open("idbpreso_notes",1);
+
+    openRequest.onerror = function(e) {
+        console.log("Error opening db");
+        console.dir(e);
+    }
+
+    //handle setup
+    openRequest.onupgradeneeded = function(e) {
+
+        console.log("running onupgradeneeded");
+        var thisDb = e.target.result;
+
+        //temp delete
+        //thisDb.deleteObjectStore("note");
+
+        //Create Note
+        if(!thisDb.objectStoreNames.contains("note")) {
+            console.log("I need to make the note objectstore");
+            var objectStore = thisDb.createObjectStore("note", { keyPath: "id", autoIncrement:true });  
+            objectStore.createIndex("title", "title", { unique: false });
+        }
+
+        //Create Log
+        if(!thisDb.objectStoreNames.contains("log")) {
+            console.log("I need to make the log objectstore");
+            var objectStore = thisDb.createObjectStore("log", { keyPath: "id", autoIncrement:true });  
+        }
+
+
+    }
+
+    openRequest.onsuccess = function(e) {
+        db = e.target.result;
+
+        db.onerror = function(event) {
+          // Generic error handler for all errors targeted at this database's
+          // requests!
+          alert("Database error: " + event.target.errorCode);
+          console.dir(event.target);
+        };
+
+        displayNotes();
+
+    }
+
+    function displayNotes(filter) {
+
+        var transaction = db.transaction(["note"], "readonly");  
+        var content="<table class='table table-bordered'><thead><tr><th>Title</th><th>Updated</th><th>&nbsp;</td></thead><tbody>";
+
+        transaction.oncomplete = function(event) {
+            $("#noteList").html(content);
+        };
+
+        transaction.onerror = function(event) {
+          // Don't forget to handle errors!
+          console.dir(event);
+        };
+
+        var handleResult = function(event) {  
+          var cursor = event.target.result;  
+          if (cursor) {  
+            content += "<tr data-key=\""+cursor.key+"\"><td class=\"notetitle\">"+cursor.value.title+"</td>";
+            content += "<td>"+dtFormat(cursor.value.updated)+"</td>";
+
+            content += "<td><a class=\"btn btn-primary edit\">Edit</a> <a class=\"btn btn-danger delete\">Delete</a></td>";
+            content +="</tr>";
+            cursor.continue();  
+          }  
+          else {  
+            content += "</tbody></table>";
+            console.log("Done with cursor");
+          }  
+        };  
+
+        var objectStore = transaction.objectStore("note");
+
+        if(filter) {
+            //Credit: http://stackoverflow.com/a/8961462/52160
+            var range = IDBKeyRange.bound(filter, filter + "z");
+            var index = objectStore.index("title");
+            index.openCursor(range).onsuccess = handleResult;
+        } else {
+            objectStore.openCursor().onsuccess = handleResult;
+        }
+        
+        doCount();
+            
+    }
+
+    $("#noteList").on("click", "a.delete", function(e) {
+        var thisId = $(this).parent().parent().data("key");
+
+        var request = db.transaction(["note"], "readwrite")  
+                        .objectStore("note")  
+                        .delete(thisId);  
+        request.onsuccess = function(event) {  
+            addLog("Deleted note "+thisId);
+            displayNotes();
+        };  
+
+        return false;
+    });
+
+    $("#noteList").on("click", "a.edit", function(e) {
+        var thisId = $(this).parent().parent().data("key");
+
+        var request = db.transaction(["note"], "readwrite")  
+                        .objectStore("note")  
+                        .get(thisId);  
+        request.onsuccess = function(event) {  
+            var note = request.result;
+            $("#key").val(note.id);
+            $("#title").val(note.title);
+            $("#body").val(note.body);
+        };  
+
+        return false;
+    });
+
+    $("#noteList").on("click", "td", function() {
+        var thisId = $(this).parent().data("key");
+        var transaction = db.transaction(["note"]);  
+        var objectStore = transaction.objectStore("note");  
+        var request = objectStore.get(thisId);  
+        request.onerror = function(event) {  
+          console.dir(event);
+        };  
+        request.onsuccess = function(event) {  
+          var note = request.result;
+          $("#noteDetail").html("<h2>"+note.title+"</h2><p>"+note.body+"</p>");
+        };  
+    });
+
+    $("#resetNoteButton").click(function() {
+        $("#title").val("");
+        $("#body").val("");
+        $("#key").val("");
+    });
+
+    $("#addNoteButton").click(function() {
+
+        var title = $("#title").val();
+        var body = $("#body").val();
+        
+        var key = $("#key").val();
+
+        if(key === "") {
+            var request = db.transaction(["note"], "readwrite")
+                            .objectStore("note")
+                            .add({title:title,body:body,updated:new Date()});
+        } else {
+            var request = db.transaction(["note"], "readwrite")
+                            .objectStore("note")
+                            .put({title:title,body:body,updated:new Date(),id:Number(key)});
+        }
+
+        request.onsuccess = function(event) {
+            $("#key").val("");
+            $("#title").val("");
+            $("#body").val("");
+            if(key === "") addLog("Added a note, id was "+event.currentTarget.result);
+            else addLog("Edited note "+key);
+            displayNotes();
+        };
+
+
+        return false;
+    });
+
+    $("#filterField").on("keyup", function(e) {
+        var filter = $(this).val();
+        displayNotes(filter);
+    });
+    
+    function addLog(msg) {
+        var logrequest = db.transaction(["log"], "readwrite")
+                        .objectStore("log")
+                        .add({log:msg,timestamp:new Date()});
+        console.log("LOG: "+msg);
+    }
+
+    function doCount() {
+        db.transaction(["note"],"readonly").objectStore("note").count().onsuccess = function(event) {
+            $("#sizeSpan").text("("+event.target.result+" Notes Total)");
+        }
+
+    }
+
+});
+
+</script>
+<style>
+td.notetitle {
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Note Database</a>
+          <form class="navbar-search pull-left">
+            <input type="text" class="search-query" placeholder="Search" id="filterField">
+          </form>
+          Size
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+	<h2>Notes <span id="sizeSpan"></span></h2>
+
+	<div id="noteList"></div>
+	<div id="noteDetail"></div>
+
+	<h2>Edit Note</h2>
+	<form>
+    <input type="hidden" id="key">
+	<input type="text" id="title" placeholder="Title" required><br/>
+	<textarea id="body" placeholder="Enter body here..." required></textarea>
+	<p>
+	<button id="addNoteButton">Save Note</button> <button id="resetNoteButton">Reset Note</button>
+	</p>
+	</form>
+
+</div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!--
+    <script src="/bootstrap/js/bootstrap-alert.js"></script>
+    <script src="/bootstrap/js/bootstrap-modal.js"></script>
+    -->
+  </body>
+</html>

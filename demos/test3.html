@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+</head>
+    
+<body>
+
+<script>
+var database;
+
+function indexedDBOk() {
+	return "indexedDB" in window;
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+
+	//No support? Go in the corner and pout.
+	if(!indexedDBOk) return;
+
+	var openRequest = indexedDB.open("idbpreso_test2test3",1);
+
+	openRequest.onupgradeneeded = function(e) {
+		var thisDB = e.target.result;
+
+		console.log("running onupgradeneeded");
+
+		if(!thisDB.objectStoreNames.contains("firstOS")) {
+			thisDB.createObjectStore("firstOS");
+		}
+	}
+
+	openRequest.onsuccess = function(e) {
+		console.log("running onsuccess");
+
+		db = e.target.result;
+
+		console.log("Current Object Stores");
+		console.dir(db.objectStoreNames);
+
+	}	
+
+	openRequest.onerror = function(e) {
+		//Do something for the error
+	}
+
+
+},false);
+</script>
+
+<!--
+	MDN doc on DOMStringList:
+	https://developer.mozilla.org/en-US/docs/DOM/DOMStringList
+-->
+</body>
+</html>

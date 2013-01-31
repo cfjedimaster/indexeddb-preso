@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+</head>
+    
+<body>
+
+<script>
+var db;
+
+function indexedDBOk() {
+	return "indexedDB" in window;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+
+	//No support? Go in the corner and pout.
+	if(!indexedDBOk) return;
+
+	var openRequest = indexedDB.open("idbpreso_test10",1);
+
+	openRequest.onupgradeneeded = function(e) {
+		var thisDB = e.target.result;
+
+		console.log("running onupgradeneeded");
+
+		if(!thisDB.objectStoreNames.contains("people")) {
+			var os = thisDB.createObjectStore("people", {autoIncrement:true});
+			//I want to get by name later
+			os.createIndex("name", "name", {unique:false});
+			//I want email to be unique
+			os.createIndex("email", "email", {unique:true});
+			os.createIndex("tags","tags", {unique:false,multiEntry:true});	
+		}
+	}
+
+	openRequest.onsuccess = function(e) {
+		console.log("running onsuccess");
+
+		db = e.target.result;
+
+		//Listen for add clicks
+		document.querySelector("#addButton").addEventListener("click", addPerson, false);
+
+		//Listen for get clicks
+		document.querySelector("#getButton").addEventListener("click", getPerson, false);
+
+	}	
+
+	openRequest.onerror = function(e) {
+		//Do something for the error
+	}
+
+
+},false);
+
+
+function addPerson(e) {
+	var name = document.querySelector("#name").value;
+	var email = document.querySelector("#email").value;
+	var tags = document.querySelector("#tags").value.split(",");
+
+	console.log("About to add "+name+"/"+email);
+
+	//Get a transaction
+	//default for OS list is all, default for type is read
+	var transaction = db.transaction(["people"],"readwrite");
+	//Ask for the objectStore
+	var store = transaction.objectStore("people");
+
+	//Define a person
+	var person = {
+		name:name,
+		email:email,
+		created:new Date(),
+		tags:tags
+	}
+
+	//Perform the add
+	var request = store.add(person);
+
+	request.onerror = function(e) {
+		alert("Sorry, that email address already exists.");
+		console.log("Error",e.target.error.name);
+		console.dir(e.target);
+		//some type of error handler
+	}
+
+	request.onsuccess = function(e) {
+		console.log("Woot! Did it");
+	}
+}
+
+function getPerson(e) {
+	var tag = document.querySelector("#tagSearch").value;
+
+	if(tag == "") return;
+
+	var transaction = db.transaction(["people"],"readonly");
+	var store = transaction.objectStore("people");
+	var index = store.index("tags");
+
+	//Make the range depending on what type we are doing
+	var range = IDBKeyRange.only(tag);
+
+	var s = "";
+
+	index.openCursor(range).onsuccess = function(e) {
+		var cursor = e.target.result;
+		if(cursor) {
+			s += "<h2>Key "+cursor.key+"</h2><p>";
+			for(var field in cursor.value) {
+				s+= field+"="+cursor.value[field]+"<br/>";
+			}
+			s+="</p>";
+			cursor.continue();
+		}
+		document.querySelector("#status").innerHTML = s;
+	}
+
+
+}
+
+</script>
+
+<input type="text" id="name" placeholder="Name"><br/>
+<input type="email" id="email" placeholder="Email"><br/>
+<input type="text" id="tags" placeholder="Tags (comma separated)"><br/>
+<button id="addButton">Add Data</button>
+
+<p/>
+
+Tag Search: <input type="text" id="tagSearch" placeholder="Tag"><br/>
+<button id="getButton">Get By Tag Search</button>
+
+<p/>
+
+<div id="status"></div>
+
+
+</body>
+</html>

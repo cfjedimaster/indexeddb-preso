@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>IndexedDB - A Place for Your Stuff</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+				<style>
+				html.intro body {
+					background:url("img/warehouse.jpg");
+					background-position:cover;
+					background-size: 100%;
+				}
+				html.intro h1, html.intro p, html.intro h3 {
+					background-color: rgba(0,0,0,0.7);
+				}
+				</style>
+
+				<section data-state="intro">
+					<h1>IndexedDB</h1>
+					<h3>A Place For Your Stuff</h3>
+					<p>
+						<small>By <a href="http://www.raymondcamden.com">Raymond Camden</a> / <a href="http://twitter.com/cfjedimaster">@cfjedimaster</a></small>
+					</p>
+				</section>
+
+				<section>					
+					<h2>Who am I?</h2>
+					<ul>
+						<li>Developer Evangelist for Adobe</li>
+						<li>Web Standards, HTML5, JavaScript, ColdFusion</li>
+						<li>Blogging at www.raymondcamden.com</li>
+					</ul>
+					<img src="img/ray.png" class="transparent">
+
+				</section>
+
+				<section>
+					<h2>Game Plan</h2>
+					<ul>
+						<li>What is it?</li>
+						<li>Where can I use it?</li>
+						<li>How can I use it?</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>What is it?</h2>
+					<blockquote cite="https://developer.mozilla.org/en-US/docs/IndexedDB">
+IndexedDB is an API for client-side storage of <u>significant</u> amounts of structured data and for high performance searches on this data using indexes.
+					</blockquote>
+					<p>
+					<cite>Credit: Mozilla Developer Network.</cite>
+					</p>
+				</section>
+
+				<section>
+					<h2>What about...</h2>
+					<ul>
+						<li class="fragment">Cookies?</li>
+						<li class="fragment">LocalStorage?</li>
+						<li class="fragment">WebSQL?</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>How much data?</h2>
+					<ul>
+						<li>For Firefox, there is no limit on the database, just a prompt for a large object</li>
+						<li>For Chrome, user is prompted (iffy)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>How much data?</h2>
+					<p>
+						Expect to be able to save a reasonable amount of data, but also expect
+						the user to <i>know</i> you are storing this data.
+					</p>
+				</section>
+
+				<section>
+					<h2>Why store data?</h2>
+					<p>
+						Every HTTP request means more data going over the pipe. If you can send it once, why not?
+					</p>
+				</section>
+
+				<section>
+					<h2>A Draft Specification</h2>
+					<ul>
+						<li>Prefixes in the wild</li>
+						<li>Offical spec: <a href="http://www.w3.org/TR/IndexedDB/">http://www.w3.org/TR/IndexedDB/</a></li>
+						<li>Expect changes</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>It's a different way to think about data</h3>
+					<img src="img/think_different.png" style="width:500px">
+					<p align="right"><i>Image credit: <a href="http://longlong240.deviantart.com/">longlong240</a></i></p>
+				</section>
+
+				<section>
+					<h2>Know SQL?</h2>
+					<img src="img/utensil_holder_large.jpg" class="fragment">
+				</section>
+
+				<section>
+					<h2>Less Precise/Rigid</h2>
+					<img src="img/buckets.jpg" class="fragment">
+				</section>
+
+				<section>
+					<h2>Where can I use this?</h2>
+					<iframe src="http://caniuse.com/indexeddb/embed/agents=ie,firefox,chrome,and_chr,ios_saf,android" class="fragment" style="width:100%;height:320px"></iframe>
+				</section>
+
+				<section>
+					<img src="img/dontpanic.png" style="width:500px">
+					<p align="right"><i>Image credit: <a href="http://parclytaxel.deviantart.com/">Parclytaxel</a></i></p>
+				</section>
+
+				<section>
+					<img src="img/supportie.jpg">
+				</section>
+
+				<section>
+					<img src="img/staircases.jpg">
+					<p align="right"><i>
+						Image credit: <a href="http://www.flickr.com/photos/oufoufsworld/">Joe Buckingham</a><br/>
+						Thought credit: <a href="">Christian Heilmann</a>
+					</i></p>
+					<!--
+					An escalator does not break.
+					A broken escalator is a staircase.
+
+					Mention polyfill
+					-->
+
+				</section>
+
+				<section>
+					<h2>Chrome Dev Tools</h2>
+					<img src="img/cdt.png">
+				</section>
+
+				<section>
+					<h1>How Can I Use It?</h1>
+				</section>
+
+				<section>
+					<h2>Step One: Check for support</h2>
+				</section>
+
+				<section>
+					<pre><code>
+document.addEventListener("DOMContentLoaded", function(){
+
+	if("indexedDB" in window) {
+		console.log("YES!!! I CAN DO IT!!! WOOT!!!");
+	} else {
+		console.log("I has a sad.");
+	}
+
+},false);						
+					</pre></code>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test1.html
+					</p>					
+				</section>
+
+				<section>
+					<h2>Step Two: Open the Database</h2>
+				</section>
+
+				<section>
+					<pre><code>
+var openRequest = indexedDB.open("test",1);
+					</pre></code>
+				</section>
+
+				<section>
+					<h2>Results (actually events)</h2>
+					<ul>
+						<li>Success!</li>
+						<li>Error :(</li>
+						<li>Upgrade needed</li>
+						<li>Blocked!</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>What <i>should</i> happen...</h2>
+					<ul>
+						<li>First time run? "Upgrade Needed" event</li>
+						<li>Success gives you a handle to the database</li>
+					</ul>
+				</section>
+
+				<section>
+					<pre><code>
+var openRequest = indexedDB.open("test",1);
+var db;
+
+openRequest.onupgradeneeded = function(e) {
+	console.log("running onupgradeneeded");
+}
+
+openRequest.onsuccess = function(e) {
+	console.log("running onsuccess");
+	db = e.target.result;
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test2.html
+					</p>					
+				</section>
+
+				<section>
+					<h2>Object Stores</h2>
+					<ul>
+						<li>Think of it like a table - your data goes here</li>
+						<li>Defines a "key" (a bit more complex than a PK)</li>
+						<li>Defines indexes (which can help with constraints)</li>
+						<li>Can <b>only</b> be done during a "upgradeneeded" event</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Pseudo-code</h2>
+					<pre><code>
+request to open the database
+
+If the request fired an upgrade needed event, create object stores
+
+If the request fired a done event, I'm ready to roll
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Making an Object Store</h2>
+					<ul>
+						<li>First, see if it exists:<br/>databaseVariable.objectStoreNames</li>
+						<li>If not, run<br/>databaseVariable.createObjectStore("name", options)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test3.html
+					</p>
+				</section>
+
+				<section>
+					<h2>Recap</h2>
+					<ul>
+						<li>We have a way to open and get a handle to our database</li>
+						<li>We have a place to store stuff (objectStore)</li>
+					</ul>
+					<p class="fragment">
+						<br/><br/><br/>
+						Now let's add some crap!
+					</p>
+				</section>
+
+				<section>
+					<h2>Adding Data</h2>
+					<ul>
+						<li>Must be done in a transaction</li>
+						<li>Transactions are specific to a store (or stores) and specify readonly or readwrite</li>
+						<li>It is asynchronous</li>
+						<li>The call is just objecstore.add(ANYTHING)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test4.html
+					</p>
+				</section>
+
+				<section>
+					<h2>What broke?</h2>
+					<ul>
+						<li>Every object needs a key</li>
+						<li>You can't <b>add</b> a key that already exists</li>
+						<li>(In case you are wondering, yes, there is a way to do updates)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Types of Keys</h2>
+					<ul>
+						<li class="fragment">No key - you specify</li>
+						<li class="fragment">Keypath (ie, a column name), you make it unique</li>
+						<li class="fragment">Keypath and a key generator (browser handles it for you)</li>
+						<li class="fragment">No key, but a key generator (best option)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Examples</h2>
+					<pre><code>
+thisDb.createObjectStore("test", { keyPath: "email" });  
+
+thisDb.createObjectStore("test2", { autoIncrement: true });  
+
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test5.html
+					</p>
+				</section>
+
+				<section>
+					<h2>Getting (one piece of) Data</h2>
+					<ul>
+						<li>Again, in a transaction</li>
+						<li>Again, asynchronous</li>
+						<li>By key</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Example</h2>
+					<pre><code>
+var transaction = db.transaction(["test"], "readonly");
+var objectStore = transaction.objectStore("test");
+
+var ob = objectStore.get(x);	
+
+ob.onsuccess = function(e) {
+
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Example</h2>
+					<pre><code>
+db.transaction(["test"], "readonly").objectStore("test").get(X).onsuccess = function(e) {
+
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test6.html
+					</p>
+				</section>
+
+				<section>
+					<h2>Getting (more than one piece of) Data</h2>
+					<ul>
+						<li>Cursor - provides a way to iterate over data</li>
+						<li>Can include a range and a direction</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Example</h2>
+					<pre><code>
+var transaction = db.transaction(["test"], "readonly");
+var objectStore = transaction.objectStore("test");
+
+var cursor = objectStore.openCursor();	
+
+cursor.onsuccess = function(e) {
+	var res = e.target.result;
+	if(res) {
+		//stuff
+		res.continue();
+	}
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test7.html
+					</p>
+				</section>	
+
+				<section>
+					<h2>Recap</h2>
+					<ul>
+						<li>You can make an object store</li>
+						<li>You can add data to it (and have keys autogenerated like unicorn magic)</li>
+						<li>You can get by primary key</li>
+						<li>You can get by all...</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Working with Indexes</h2>
+					<ul>
+						<li>An index tells IndexedDB, I want to get crap by this property later</li>
+						<li>It also allows us to set a property as being unique</li>
+						<li>Done at object store creation time (which means upgrade needed time as well)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<pre><code>
+var objectStore = thisDb.createObjectStore("test", 
+					{ autoIncrement:true });
+//first arg is name of index, second is the path (col);
+objectStore.createIndex("name","name", {unique:false});
+objectStore.createIndex("email","email", {unique:true});
+					</pre></code>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test8.html
+					</p>
+				</section>
+
+				<section>
+					<h2>Ranges</h2>
+					<ul>
+						<li>
+							Allow you to grab a subset of data
+							<ul>
+								<li>Up to X</li>
+								<li>X and higher</li>
+								<li>Between X and Y</li>
+								<li>For all of the above, inclusive and non-exclusive</li>
+							</ul>
+						</li>
+						<li>Numeric and string based range</li>
+						<li>Can be in any direction as well</li>
+					</ul>
+				</section>
+
+				<section>
+					<pre><code>
+//Taken from MDN
+// Match anything past "Bill", including "Bill"
+var lowerBoundKeyRange = IDBKeyRange.lowerBound("Bill");
+ 
+// Match anything past "Bill", but don't include "Bill"
+var lowerBoundOpenKeyRange = IDBKeyRange.lowerBound("Bill", true);
+ 
+// Match anything up to, but not including, "Donna"
+var upperBoundOpenKeyRange = IDBKeyRange.upperBound("Donna", true);
+ 
+//Match anything between "Bill" and "Donna", but not including "Donna"
+var boundKeyRange = IDBKeyRange.bound("Bill", "Donna", false, true);
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test9.html
+					</p>
+				</section>
+
+				<section>
+					<h2>FYI - Reverse Range/Unique</h2>
+					<pre><code>
+objectStore.openCursor(range, IDBCursor.PREV);
+objectStore.openCursor(range, IDBCursor.PREV_NO_DUPLICATE);
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Full Demo</h2>
+					<ul>
+						<li>Demonstrates put and delete</li>
+						<li>Demonstrates count() feature</li>
+						<li>Demonstrates 'search' (hack)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Complex Data</h2>
+					<ul>
+						<li>You can store deeply nested, complex objects</li>
+						<li>You can store binary data as well</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Example of a complex object</h2>
+					<pre><code>
+var person = {name:"Raymond", email:"foo@foo.com", 
+              tags:["ajax","mashup","html5","jquery","cats"]};
+					</pre></code>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>
+						test10.html
+					</p>
+
+				</section>
+
+				<section>
+					<h2>Good Links</h2>
+					<ul>
+						<li><a href="https://developer.mozilla.org/en-US/docs/IndexedDB">MDN: IndexedDB</a></li>
+						
+					</ul>
+				</section>
+
+				<section>
+					<h1>Any Questions?</h1>
+					<img src="img/bullet-time-cat-jump.gif">
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

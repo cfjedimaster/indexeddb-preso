@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+</head>
+    
+<body>
+
+<script>
+function indexedDBOk() {
+	return "indexedDB" in window;
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+
+	//No support? Go in the corner and pout.
+	if(!indexedDBOk) return;
+
+	var openRequest = indexedDB.open("idbpreso_test2",1);
+
+	openRequest.onupgradeneeded = function(e) {
+		console.log("running onupgradeneeded");
+	}
+
+	openRequest.onsuccess = function(e) {
+		console.log("running onsuccess");
+		console.dir(e.target.result);
+	}	
+
+	openRequest.onerror = function(e) {
+		//Do something for the error
+	}
+
+},false);
+</script>
+</body>
+</html>
