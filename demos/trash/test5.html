@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	//No support? Go in the corner and pout.
 	if(!indexedDBOk) return;
-	
-	var openRequest = indexedDB.open("idbpreso_test4",1);
+
+	var openRequest = indexedDB.open("idbpreso_test5b",1);
 
 	openRequest.onupgradeneeded = function(e) {
 		var thisDB = e.target.result;
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		console.log("running onupgradeneeded");
 
 		if(!thisDB.objectStoreNames.contains("people")) {
-			thisDB.createObjectStore("people");
+			thisDB.createObjectStore("people", {autoIncrement:true});
 		}
 	}
 
@@ -69,7 +69,7 @@ function addPerson(e) {
 	}
 
 	//Perform the add
-	var request = store.add(person,1);
+	var request = store.add(person);
 
 	request.onerror = function(e) {
 		console.log("Error",e.target.error.name);

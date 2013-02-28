@@ -37,6 +37,7 @@ function dtFormat(input) {
     var res = (input.getMonth()+1) + "/" + input.getDate() + "/" + input.getFullYear() + " ";
     var hour = input.getHours()+1;
     var ampm = "AM";
+	if(hour === 12) ampm = "PM";
     if(hour > 12){
         hour-=12;
         ampm = "PM";
@@ -100,7 +101,7 @@ $(document).ready(function() {
         var transaction = db.transaction(["note"], "readonly");  
         var content="<table class='table table-bordered'><thead><tr><th>Title</th><th>Updated</th><th>&nbsp;</td></thead><tbody>";
 
-        transaction.oncomplete = function(event) {
+transaction.oncomplete = function(event) {
             $("#noteList").html(content);
         };
 
@@ -121,7 +122,6 @@ $(document).ready(function() {
           }  
           else {  
             content += "</tbody></table>";
-            console.log("Done with cursor");
           }  
         };  
 
@@ -143,14 +143,14 @@ $(document).ready(function() {
     $("#noteList").on("click", "a.delete", function(e) {
         var thisId = $(this).parent().parent().data("key");
 
-        var request = db.transaction(["note"], "readwrite")  
-                        .objectStore("note")  
-                        .delete(thisId);  
+		var t = db.transaction(["note"], "readwrite");
+		var request = t.objectStore("note").delete(thisId);
         request.onsuccess = function(event) {  
             addLog("Deleted note "+thisId);
-            displayNotes();
         };  
-
+		t.oncomplete = function(event) {
+			displayNotes();
+		}
         return false;
     });
 
@@ -197,13 +197,13 @@ $(document).ready(function() {
         
         var key = $("#key").val();
 
+		var t = db.transaction(["note"], "readwrite");
+		
         if(key === "") {
-            var request = db.transaction(["note"], "readwrite")
-                            .objectStore("note")
+            var request = t.objectStore("note")
                             .add({title:title,body:body,updated:new Date()});
         } else {
-            var request = db.transaction(["note"], "readwrite")
-                            .objectStore("note")
+            var request = t.objectStore("note")
                             .put({title:title,body:body,updated:new Date(),id:Number(key)});
         }
 
@@ -216,6 +216,9 @@ $(document).ready(function() {
             displayNotes();
         };
 
+		t.oncomplete = function(event) {
+			displayNotes();
+		}
 
         return false;
     });

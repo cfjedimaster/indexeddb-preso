@@ -1,1 +1,7 @@
 All my files (presentation and demos) for my IndexedDB presentation.
+
+1) Note - the trash folder is for random tests that may come up during a presentation. I'm including it in source in case something
+interesting ever comes out of it.
+
+2) Note - there is a "bug" in my slide deck that I'll address before I give this presentation again. When you CRUD data, if you wish to 
+immediately perform a GetAll type operation, you will want to ensure you listen for the transaction oncomplete.
