@@ -101,7 +101,7 @@ $(document).ready(function() {
         var transaction = db.transaction(["note"], "readonly");  
         var content="<table class='table table-bordered'><thead><tr><th>Title</th><th>Updated</th><th>&nbsp;</td></thead><tbody>";
 
-transaction.oncomplete = function(event) {
+		transaction.oncomplete = function(event) {
             $("#noteList").html(content);
         };
 
