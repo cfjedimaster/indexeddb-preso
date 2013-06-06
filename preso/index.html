@@ -65,7 +65,8 @@
 				<section>					
 					<h2>Who am I?</h2>
 					<ul style="float:left;width:60%">
-						<li>Developer Evangelist for Adobe</li>
+                        <li>Raymond Camden</li>
+						<li>Creative Cloud Evangelist for Adobe</li>
 						<li>Web Standards, HTML5, JavaScript, ColdFusion</li>
 						<li>Blogging at raymondcamden.com</li>
 						<li>@cfjedimaster</li>
@@ -125,11 +126,11 @@ IndexedDB is an API for client-side storage of <u>significant</u> amounts of str
 				</section>
 
 				<section>
-					<h2>A Draft Specification</h2>
+					<h2>A "Last Call" Specification</h2>
 					<ul>
 						<li>Prefixes in the wild</li>
 						<li>Offical spec: <a href="http://www.w3.org/TR/IndexedDB/">http://www.w3.org/TR/IndexedDB/</a></li>
-						<li>Expect changes</li>
+						<li>Mostly locked down</li>
 					</ul>
 				</section>
 
@@ -308,8 +309,8 @@ If the request fired a done event, I'm ready to roll
 						<li>We have a place to store stuff (objectStore)</li>
 					</ul>
 					<p class="fragment">
-						<br/><br/><br/>
-						Now let's add some crap!
+						<br/><br/>
+						Now let's add some stuff!
 					</p>
 				</section>
 
@@ -390,7 +391,7 @@ ob.onsuccess = function(e) {
 				</section>
 
 				<section>
-					<h2>Example</h2>
+					<h2>Uber Example</h2>
 					<pre><code>
 db.transaction(["test"], "readonly").objectStore("test").get(X).onsuccess = function(e) {
 
@@ -533,7 +534,14 @@ objectStore.openCursor(range, IDBCursor.PREV_NO_DUPLICATE);
 					</ul>
 				</section>
 
-				<section>
+                <section>
+                    <h2>Map Demo</h2>
+                    <p>
+                    <a href="http://www.raymondcamden.com/demos/2013/feb/2/test4.html" target="_new">Demo</a>
+                    </p>
+                </section>
+				
+                <section>
 					<h2>Complex Data</h2>
 					<ul>
 						<li>You can store deeply nested, complex objects</li>
@@ -574,6 +582,23 @@ var person = {name:"Raymond", email:"foo@foo.com",
 
 		</div>
 
+<style>
+.adobe {
+padding-left: 10px; 
+padding-top: 40px; 
+padding-bottom: 10px; 
+position: absolute; 
+right: 80px; 
+top: 0px; 
+background-color: #F00; 
+width: 40px; 
+height: 40px;
+}
+</style>
+<div class="adobe">
+	<img src="img/adobe_logo.png" width="30" height="40">
+</div>
+        
 		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.min.js"></script>
 
